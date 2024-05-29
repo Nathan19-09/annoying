@@ -1,0 +1,61 @@
+import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.*;
+
+public class CursorLock {
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Cursor Lock");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(300, 200);
+            frame.setLocationRelativeTo(null);
+
+            JButton lockButton = new JButton("Lock Cursor");
+            lockButton.addActionListener(e -> lockCursor());
+
+            JButton unlockButton = new JButton("Unlock Cursor");
+            unlockButton.addActionListener(e -> unlockCursor());
+
+            frame.getContentPane().setLayout(new FlowLayout());
+            frame.getContentPane().add(lockButton);
+            frame.getContentPane().add(unlockButton);
+            frame.setVisible(true);
+        });
+    }
+
+    private static Robot robot;
+    private static boolean locked = false;
+    private static Point lockPoint;
+
+    static {
+        try {
+            robot = new Robot();
+        } catch (AWTException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void lockCursor() {
+        if (locked) return;
+
+        lockPoint = MouseInfo.getPointerInfo().getLocation();
+        locked = true;
+
+        new Thread(() -> {
+            while (locked) {
+                robot.mouseMove(lockPoint.x, lockPoint.y);
+                try {
+                    Thread.sleep(50); // Adjust the sleep time as necessary
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private static void unlockCursor() {
+        locked = false;
+    }
+}
