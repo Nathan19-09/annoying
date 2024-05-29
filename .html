@@ -3,25 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Java Interaction</title>
+    <title>Cursor Lock Example</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: blue;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2em;
+            font-family: Arial, sans-serif;
+        }
+    </style>
 </head>
 <body>
-    <button id="playAudioButton">Play Audio</button>
-    <button id="lockCursorButton">Lock Cursor</button>
-
+    <div id="content">Test</div>
     <script>
-        document.getElementById('playAudioButton').addEventListener('click', function() {
-            fetch('/api/play-audio')
-                .then(response => response.text())
-                .then(data => alert(data))
-                .catch(error => console.error('Error:', error));
+        // Function to lock the cursor
+        function lockCursor() {
+            document.body.requestPointerLock = document.body.requestPointerLock || 
+                                               document.body.mozRequestPointerLock || 
+                                               document.body.webkitRequestPointerLock;
+            if (document.body.requestPointerLock) {
+                document.body.requestPointerLock();
+            } else {
+                alert("Pointer Lock API is not supported by your browser.");
+            }
+        }
+
+        // Request pointer lock when the page loads
+        window.onload = () => {
+            lockCursor();
+        };
+
+        // Handle pointer lock change events
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement === document.body) {
+                console.log('Pointer is locked');
+            } else {
+                console.log('Pointer is unlocked');
+                // Optionally re-lock the pointer if it gets unlocked
+                lockCursor();
+            }
         });
 
-        document.getElementById('lockCursorButton').addEventListener('click', function() {
-            fetch('/api/lock-cursor')
-                .then(response => response.text())
-                .then(data => alert(data))
-                .catch(error => console.error('Error:', error));
+        // Handle any errors that occur
+        document.addEventListener('pointerlockerror', () => {
+            console.error('Error attempting to lock the pointer.');
         });
     </script>
 </body>
